@@ -7,8 +7,8 @@ import Polinomios.AreaEspelhoDagua;
 import Polinomios.Jusante;
 import Polinomios.Montante;
 import casaDeMaquina.Conjuntos_unidades;
-import fuzzy.BaseRegras;
-import fuzzy.BaseRegras2;
+//import fuzzy.BaseRegras;
+//import fuzzy.BaseRegras2;
 
 public abstract class UsinaHidroeletrica {
 
@@ -18,7 +18,7 @@ public abstract class UsinaHidroeletrica {
     private ArrayList<UsinaHidroeletrica> usinaAJusante = new ArrayList<UsinaHidroeletrica>();
     private ArrayList<UsinaHidroeletrica> usinaImediatamenteAMontante = new ArrayList<UsinaHidroeletrica>();
 //	private BaseRegras regras;
-    private BaseRegras2 regras;
+   // private BaseRegras2 regras;
 
 //	public void RegrasEm() {
 //		
@@ -40,14 +40,14 @@ public abstract class UsinaHidroeletrica {
 
     }
 
-    public BaseRegras2 getRegras() {
-        return regras;
-
-    }
-
-    public void setRegras(BaseRegras2 regras) {
-        this.regras = regras;
-    }
+//    public BaseRegras2 getRegras() {
+//        return regras;
+//
+//    }
+//
+//    public void setRegras(BaseRegras2 regras) {
+//        this.regras = regras;
+//    }
 
     public int getCodigo() {
         return codigo;

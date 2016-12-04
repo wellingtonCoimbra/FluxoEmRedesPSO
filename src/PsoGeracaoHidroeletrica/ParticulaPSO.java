@@ -1,141 +1,158 @@
 package PsoGeracaoHidroeletrica;
 
-import java.util.Random;
 
 import simulacao.SimulacaoOperacaoEnergeticaPSO;
 
 public class ParticulaPSO {
 
-	private double[][] velocidade;
-	private double[][] posicao;
-	private double[] posicaomin;
-	private double[] posicaomax;
-	private double[] velocidademax,velocidademin;
+	private double[][][] velocidade;
+	private double[][][] posicao;
+	private final double[][] posicaomin;
+	private final double[][] posicaomax;
+	private final double[][] velocidademax,velocidademin;
 	private double pbest;
-	private double[][] vetorpbest;
-	private double[] valorAgua;
+	private double[][][] vetorpbest;
+	//private double[] valorAgua;
 	
-	public ParticulaPSO(int iteracao,int dimensao,int i,double[] xmin,double[] xmax,double[] paramVolumesfinais){
-		posicao=new double[iteracao][dimensao];
-		velocidade=new double[iteracao][dimensao];
-		vetorpbest=new double[iteracao][dimensao];
-		posicaomin=new double[dimensao];
-		posicaomax=new double[dimensao];
-		valorAgua=new double[dimensao];
-		velocidademax=new double[dimensao];
-		velocidademin=new double[dimensao];
-		for(int j=0;j<dimensao;j++){
-			if(j<60){
-			this.posicaomin[j]=xmin[0];
-			this.posicaomax[j]=xmax[0];
-			}else{ if(j<120){
-				this.posicaomin[j]=xmin[1];
-				this.posicaomax[j]=xmax[1];
-			}	else{
-				this.posicaomin[j]=xmin[2];
-				this.posicaomax[j]=xmax[2];
-			}
-			
-			}
-		}		
-		for(int j=0;j<dimensao;j++){
-			if(j<60){
-			velocidademin[j]=(xmin[0] - xmax[0])/iteracao;
-			velocidademax[j]=(xmax[0]-xmin[0])/iteracao;
-			}else{
-				if(j<120){
-					velocidademin[j]=(xmin[1] - xmax[1])/iteracao;
-					velocidademax[j]=(xmax[1]-xmin[1])/iteracao;
-				}else{
-					velocidademin[j]=(xmin[2] - xmax[2])/iteracao;
-					velocidademax[j]=(xmax[2]-xmin[2])/iteracao;
-				}
-			}
-			}
-		
-		Random geradorposicao = new Random();
-		Random geradorposicaopos=new Random();
-		
-		for(int j=0;j<dimensao;j++){
-			//gerar a parte decimal
-			double decimal=geradorposicao.nextDouble();
-			//gerar
-			double neg=(geradorposicao.nextInt(2));
-			neg=(-1)*(neg*0.01)*(paramVolumesfinais[j]);
-			double pos=(geradorposicaopos.nextInt(3));
-			pos=(pos*0.01)*(paramVolumesfinais[j]);
-			posicao[0][j]=paramVolumesfinais[j] + pos+neg;
-			if(posicao[0][j]<posicaomin[j]){
-				posicao[0][j]=posicaomin[j];
-			}
-			else{
-				if(posicao[0][j]>posicaomax[j]){
-					posicao[0][j]=posicaomax[j];
-				}
-			}
-			//posicao[0][j]=geradorposicao.nextInt((int) (this.posicaomax[j]-this.posicaomin[j]-1))+this.posicaomin[j]+decimal;
-			decimal=geradorposicao.nextDouble();
-			//velocidade[0][j]=geradorposicao.nextInt((int) (velocidademax[j]-velocidademin[j]-1))+velocidademin[j]+decimal;
-			velocidade[0][j]=0;
-			
+	public ParticulaPSO(int iteracao,int numUsinas,int numIntervalos,int i,double[] xminvazao,double[] xmaxvazao,double[] xminvolume,double[] xmaxvolume,SimulacaoOperacaoEnergeticaPSO simulacao){
+		//a variavel volume vazao é porque as usinas terao como valores os volumes finais e vazaoes defluentes em sequencia
+                int volumeVazao=numIntervalos*2;
+                posicao=new double[iteracao][numUsinas][volumeVazao];
+		velocidade=new double[iteracao][numUsinas][volumeVazao];
+		vetorpbest=new double[iteracao][numUsinas][volumeVazao];
+		posicaomin=new double[numUsinas][volumeVazao];
+		posicaomax=new double[numUsinas][volumeVazao];
+		//valorAgua=new double[dimensao];
+		velocidademax=new double[numUsinas][volumeVazao];
+		velocidademin=new double[numUsinas][volumeVazao];
+                //foi separado devido aos limites de volume e vazão serem diferentes
+                for(int j=0;j<numUsinas;j++){
+                    for(int k=0;k<numIntervalos;k++){
+                        posicaomin[j][k] = xminvolume[j];
+                        posicaomax[j][k] = xmaxvolume[j];
+                    }
 		}
+                for(int j=0;j<numUsinas;j++){
+                    for(int k=numIntervalos;k<volumeVazao;k++){
+                        posicaomin[j][k] = xminvazao[j];
+                        posicaomax[j][k] = xmaxvazao[j];
+                    }
+		}
+                for(int j=0;j<numUsinas;j++){
+                    for(int k=0;k<numIntervalos;k++){
+                        velocidademin[j][k] = (xminvolume[j] - xmaxvolume[j])/iteracao;
+                        velocidademax[j][k] = (xmaxvolume[j] - xminvolume[j])/iteracao;
+			}
+                }
+                
+                for(int j=0;j<numUsinas;j++){
+                    for(int k=numIntervalos;k<volumeVazao;k++){
+                        velocidademin[j][k] = (xminvazao[j] - xmaxvazao[j])/iteracao;
+                        velocidademax[j][k] = (xmaxvazao[j] - xminvazao[j])/iteracao;
+			}
+                }
+                
+                for(int j = 0;j<numUsinas;j++){
+                    for(int k = 0 ; k < numIntervalos;k++){
+                        posicao[0][j][k] = xmaxvolume[j];
+                    }
+                    for(int k = numIntervalos ; k < volumeVazao;k++){
+                        //apenas a natural pq as usinas a montante defluem tudo que chegam nelas, portanto acaba sendo a natural
+                        posicao[0][j][k] = simulacao.getNos()[k-numIntervalos][j].getVazaoAfluenteNatural();   
+                    }
+                }
+                
+		
+//		for(int j=0;j<dimensao;j++){
+//			//gerar a parte decimal
+//			double decimal=geradorposicao.nextDouble();
+//			//gerar
+//			double neg=(geradorposicao.nextInt(2));
+//			neg=(-1)*(neg*0.01)*(paramVolumesfinais[j]);
+//			double pos=(geradorposicaopos.nextInt(3));
+//			pos=(pos*0.01)*(paramVolumesfinais[j]);
+//			posicao[0][j]=paramVolumesfinais[j] + pos+neg;
+//			if(posicao[0][j]<posicaomin[j]){
+//				posicao[0][j]=posicaomin[j];
+//			}
+//			else{
+//				if(posicao[0][j]>posicaomax[j]){
+//					posicao[0][j]=posicaomax[j];
+//				}
+//			}
+//			//posicao[0][j]=geradorposicao.nextInt((int) (this.posicaomax[j]-this.posicaomin[j]-1))+this.posicaomin[j]+decimal;
+//			decimal=geradorposicao.nextDouble();
+//			//velocidade[0][j]=geradorposicao.nextInt((int) (velocidademax[j]-velocidademin[j]-1))+velocidademin[j]+decimal;
+//			velocidade[0][j]=0;
+//			
+//		}
 		
 	}
 	
-	public void AtualizarVelocidade(SimulacaoOperacaoEnergeticaPSO simulacao,int iteracao,double c1,double c2,double r1,double r2,double[][] xxx){
-		for(int i=0;i<posicaomin.length;i++){
-		velocidade[iteracao][i]=0.001*valorAgua[i]+  velocidade[iteracao-1][i] + c1*r1*(vetorpbest[iteracao-1][i] - posicao[iteracao-1][i])+
-				c2*r2*(xxx[iteracao-1][i]-posicao[iteracao-1][i]);
+	public void AtualizarVelocidade(SimulacaoOperacaoEnergeticaPSO simulacao,int iteracao,double c1,double c2,double r1,double r2,double[][][] xxx){
+            int numUsinas=posicaomin.length;
+            int numIntervalos=posicao[0].length;
+            for(int i=0;i<numUsinas;i++){
+                for(int j=0;j <numIntervalos;j++){
+                    velocidade[iteracao][i][j]= velocidade[iteracao-1][i][j] + c1*r1*(vetorpbest[iteracao-1][i][j] - posicao[iteracao-1][i][j])+
+                    		c2*r2*(xxx[iteracao-1][i][j]-posicao[iteracao-1][i][j]);
+                
 		//verifica se passou dos limites
-			if(velocidade[iteracao][i]>velocidademax[i]){
-			velocidade[iteracao][i]=velocidademax[i];
+                    
+                    if(velocidade[iteracao][i][j]>velocidademax[i][j]){
+                        velocidade[iteracao][i][j]=velocidademax[i][j];
 			
-			}
-			if(velocidade[iteracao][i]<velocidademin[i]){
-			velocidade[iteracao][i]=velocidademin[i];
-			}
+                        }
+                    if(velocidade[iteracao][i][j] <velocidademin[i][j]){
+                        velocidade[iteracao][i][j]=velocidademin[i][j];
+                    }
 	
 		}
+            }    
 	}
 	
 	
 	
 	public void AtualizarPosicao(int iteracao){
-		
-		for(int i=0;i<posicaomin.length;i++){		
-		posicao[iteracao][i]=posicao[iteracao-1][i]+ velocidade[iteracao][i];
-			if(posicao[iteracao][i]>posicaomax[i]){
-				posicao[iteracao][i]=posicaomax[i];
-			
-			}
-			if(posicao[iteracao][i]<posicaomin[i]){
-				posicao[iteracao][i]=posicaomin[i];
-			}
+            int numUsinas=posicaomin.length;
+            int numIntervalos=posicaomin[0].length;
+            for(int i=0;i<numUsinas;i++){		
+		for(int j=0;j<numIntervalos;j++){
+                    posicao[iteracao][i][j]=posicao[iteracao-1][i][j]+ velocidade[iteracao][i][j];
+                    if(posicao[iteracao][i][j]>posicaomax[i][j]){
+			posicao[iteracao][i][j]=posicaomax[i][j];
+                    }
+                    if(posicao[iteracao][i][j]<posicaomin[i][j]){
+			posicao[iteracao][i][j]=posicaomin[i][j];
+                    }
 		}
-		
+            }
 	}
 	
 	
 	public void AvaliarParticula(int iteracao,SimulacaoOperacaoEnergeticaPSO simulacao){
-		double fitness = 0;
-		simulacao.definirVolumesFinais(posicao[iteracao],3, 60);
-		fitness=simulacao.simularOperacaoEnergeticaPSO(60);
-		simulacao.determinaValorAgua(this.valorAgua);
+                int numIntervalos = posicaomin[0].length/2;
+                int numUsinas= posicaomin.length;
+		double fitness;
+		simulacao.definirVolumesFinais(posicao[iteracao],numUsinas, numIntervalos);
+                simulacao.definirVazoesDefluentes(posicao[iteracao],numUsinas, numIntervalos);
+		fitness=simulacao.simularOperacaoEnergeticaPSO(numIntervalos);
+		//simulacao.determinaValorAgua(this.valorAgua);
 		//fitnes=(posicao[iteracao][0])*(posicao[iteracao][0]) -(posicao[iteracao][0])*(posicao[iteracao][1]) +(posicao[iteracao][1])*(posicao[iteracao][1]) -3*(posicao[iteracao][1]);
 		if(iteracao==0){
 			pbest=fitness;
 			for (int i = 0; i < posicaomin.length; i++) {
-				vetorpbest[iteracao][i]=posicao[iteracao][i];
+                            System.arraycopy(posicao[iteracao][i], 0, vetorpbest[iteracao][i], 0, numIntervalos*2);    
 			}
 		}else{
 			if(fitness<pbest){
 			pbest=fitness;
 			for (int i = 0; i < posicaomin.length; i++) {
-				vetorpbest[iteracao][i]=posicao[iteracao][i];
+                            System.arraycopy(posicao[iteracao][i], 0, vetorpbest[iteracao][i], 0, numIntervalos*2);    
 			}
 			}else{
 				for (int i = 0; i < posicaomin.length; i++) {
-					vetorpbest[iteracao][i]=vetorpbest[iteracao-1][i];
+                                    System.arraycopy(vetorpbest[iteracao-1][i], 0, vetorpbest[iteracao][i], 0, numIntervalos*2);    
 				}
 			}
 		}
@@ -143,30 +160,30 @@ public class ParticulaPSO {
 	}
 	
 	
-	public double[] getValorAgua() {
-		return valorAgua;
-	}
+//	public double[] getValorAgua() {
+//		return valorAgua;
+//	}
+//
+//	public void setValorAgua(double[] valorAgua) {
+//		this.valorAgua = valorAgua;
+//	}
 
-	public void setValorAgua(double[] valorAgua) {
-		this.valorAgua = valorAgua;
-	}
-
-	public double[][] getV() {
+	public double[][][] getV() {
 		return velocidade;
 	}
 
 
-	public void setV(double[][] v) {
+	public void setV(double[][][] v) {
 		this.velocidade = v;
 	}
 
 
-	public double[][] getX() {
+	public double[][][] getX() {
 		return posicao;
 	}
 
 
-	public void setX(double[][] x) {
+	public void setX(double[][][] x) {
 		this.posicao = x;
 	}
 
@@ -178,11 +195,11 @@ public class ParticulaPSO {
 		this.pbest = pbest;
 	}
 
-	public double[][] getXx() {
+	public double[][][] getXx() {
 		return vetorpbest;
 	}
 
-	public void setXx(double[][] xx) {
+	public void setXx(double[][][] xx) {
 		this.vetorpbest = xx;
 	}
 

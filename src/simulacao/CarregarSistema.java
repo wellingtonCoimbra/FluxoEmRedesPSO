@@ -136,7 +136,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 		//------- afluencia de 	TresMarias------
 		try { 
-			FileReader arq = new FileReader("C:\\Users\\Wellington\\Documents\\Estudo-Projetos atual\\PSO\\TesteSimulacaoTSI\\2000-2005\\Tr�s Marias.txt");
+			FileReader arq = new FileReader("C:\\Users\\Wellington\\Documents\\Estudo-Projetos atual\\PSO\\TesteSimulacaoTSI\\2000-2005\\Três Marias.txt");
 			BufferedReader lerArq = new BufferedReader(arq); 
 			String linha = lerArq.readLine(); 
 			int i=0;

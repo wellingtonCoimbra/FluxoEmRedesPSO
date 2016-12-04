@@ -12,47 +12,64 @@ public class PSO {
 	private double c2=2;
 	private double r1;
 	private double r2;
-	private double[] xmin;
-	private double[] xmax;
+	private double[] xminvolume;
+	private double[] xmaxvolume;
+        private double[] xminvazao;
+        private double[] xmaxvazao;
 	private double[] volumesfinais_simulacao;
 	private SimulacaoOperacaoEnergeticaPSO simulacaoHidroeletrica;
 	private CarregarSistema carregar=new CarregarSistema();
 	private ArrayList<ParticulaPSO> particulas;
-	private int dimensao;
+	private int numUsinas;
+        private int numIntervalos;
 	private int numeroParticulas;
 	private double gbest;
-	private double[][] vetorGbest;
+	private double[][][] vetorGbest;
 	private int iteracoes;
 	private int g;
-	public PSO(double demanda,int numeroParticulas,int dimensao,int iteracoes,double c1,double c2
-			,double[] paramVolumesfinais){
+	public PSO(double demanda,int numeroParticulas,int numUsinas,int Intervalos,int iteracoes,double c1,double c2){
 		this.numeroParticulas=numeroParticulas;
-		this.dimensao=dimensao;
+		this.numUsinas=numUsinas;
+                this.numIntervalos = Intervalos;
 		this.iteracoes=iteracoes;
-		this.volumesfinais_simulacao=paramVolumesfinais;
-		this.xmin=new double[3];
-		this.xmax=new double[3];
-		this.xmin[0]=4250;this.xmin[1]=5447;this.xmin[2]=7238;
-		this.xmax[0]=19528;this.xmax[1]=34116;this.xmax[2]=10782;
+		this.xminvolume=new double[numUsinas];
+		this.xmaxvolume=new double[numUsinas];
+                this.xminvazao= new double[numUsinas];
+                this.xmaxvazao= new double[numUsinas];
 		particulas=new ArrayList<>();
-		vetorGbest=new double[iteracoes][dimensao];
+		vetorGbest=new double[iteracoes][numUsinas][numIntervalos];
 		this.c1=c1;
 		this.c2=c2;
-		simulacaoHidroeletrica=new SimulacaoOperacaoEnergeticaPSO(60,demanda);
+		simulacaoHidroeletrica=new SimulacaoOperacaoEnergeticaPSO(Intervalos,demanda);
 		try {
 			carregar.testarSimulacaoUsinasReservatorio(simulacaoHidroeletrica);
+                        inicializaLimitesVolumeVazao(simulacaoHidroeletrica);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println("erro ao carregar o sistema hidroeletrico");
 		}
 	}
 	
+        public void inicializaLimitesVolumeVazao(SimulacaoOperacaoEnergeticaPSO simulacao){
+            for(int i=0;i<numUsinas;i++){
+                xmaxvolume[i] = simulacao.getNos()[0][i].getLimiteMaximoVolume();
+                xminvolume[i] = simulacao.getNos()[0][i].getLimiteMinimoVolume();
+                xminvazao[i] = simulacao.getNos()[0][i].getLimiteMinimoVazaoDefluente();
+                xmaxvazao[i] = simulacao.getNos()[0][i].getLimiteMaximoVazaoDefluente();
+                
+            }
+            
+        }
+        
 	public void InicializarParticulas(){
 		for(int i=0;i<numeroParticulas;i++){
-			ParticulaPSO particula=new ParticulaPSO(iteracoes,dimensao,i,xmin,xmax,this.volumesfinais_simulacao); 
+			ParticulaPSO particula=new ParticulaPSO(iteracoes,numUsinas,numIntervalos,i,xminvazao,xmaxvazao,xminvolume,xmaxvolume,this.simulacaoHidroeletrica); 
 			particulas.add(particula);
 		}
 	}
+        public void definirVolumesFinais(){
+            
+        }
 	
 	public void AvaliarParticulas(int iteracao){
 		for(int i=0;i<numeroParticulas;i++){
@@ -98,52 +115,58 @@ public class PSO {
 		if((gbest>gbestIteracao)||(iteracao==0)){
 			gbest=gbestIteracao;
 			g=gIteracao;
-			for(int i=0;i<dimensao;i++){
-				vetorGbest[iteracao][i]=particulas.get(g).getX()[iteracao][i];
+			for(int i=0;i<numUsinas;i++){
+                            //verificar se assim funciona
+                            //vetorGbest[iteracao][i] = particulas.get(g).getX()[iteracao][i];
+                            //outra maneira de fazer
+                            System.arraycopy(particulas.get(g).getX()[iteracao][i], 0, vetorGbest[iteracao][i], 0, numIntervalos);
+//                            for(int j=0;j<numIntervalos;j++){
+//				vetorGbest[iteracao][i][j]=particulas.get(g).getX()[iteracao][i][j];
+//                            }    
 			}
 		}
 		//se algum da atual iteracao nao for melhor e pq ate o momento o melhor tbm e o melhor da iteracao anterior
 		else{
-			for(int i=0;i<dimensao;i++){
-				vetorGbest[iteracao][i]=vetorGbest[iteracao-1][i];
+			for(int i=0;i<numUsinas;i++){
+                            System.arraycopy(vetorGbest[iteracao-1][i], 0, vetorGbest[iteracao][i], 0, numIntervalos);    
 			}
 		}
 	}
 	
 	
-	public void InicializarPbestGbest(){
-		double fitnes = 0;
-
-		for(int i=0;i<numeroParticulas;i++){
-			double[][] posicao=particulas.get(i).getX();
-			double x1=posicao[0][0];
-			double x2=posicao[0][1];
-			//fitnes=(x1*x1) -(x1*x2)+(x2*x2)-(3*x2);
-			particulas.get(i).setPbest(fitnes);
-			particulas.get(i).getXx()[0][0]=posicao[0][0];
-			particulas.get(i).getXx()[0][1]=posicao[0][1];
-			if(i==0){
-				gbest=fitnes;
-				g=i;
-				for(int j=0;j<dimensao;j++){
-					vetorGbest[0][i]=posicao[0][i];
-				}
-
-			}else{
-				if(fitnes<gbest){
-					g=i;
-					gbest=fitnes;
-					vetorGbest[0][0]=posicao[0][0];
-					vetorGbest[0][1]=posicao[0][1];
-				}
-			}
-			particulas.get(i).setPbest(fitnes);
-		}
-	}
+//	public void InicializarPbestGbest(){
+//		double fitnes = 0;
+//
+//		for(int i=0;i<numeroParticulas;i++){
+//			double[][][] posicao=particulas.get(i).getX();
+//			double x1=posicao[0][0][0];
+//			double x2=posicao[0][];
+//			//fitnes=(x1*x1) -(x1*x2)+(x2*x2)-(3*x2);
+//			particulas.get(i).setPbest(fitnes);
+//			particulas.get(i).getXx()[0][0]=posicao[0][0];
+//			particulas.get(i).getXx()[0][1]=posicao[0][1];
+//			if(i==0){
+//				gbest=fitnes;
+//				g=i;
+//				for(int j=0;j<dimensao;j++){
+//					vetorGbest[0][i]=posicao[0][i];
+//				}
+//
+//			}else{
+//				if(fitnes<gbest){
+//					g=i;
+//					gbest=fitnes;
+//					vetorGbest[0][0]=posicao[0][0];
+//					vetorGbest[0][1]=posicao[0][1];
+//				}
+//			}
+//			particulas.get(i).setPbest(fitnes);
+//		}
+//	}
+//	
 	
 	
-	
-	public double[] executar(){
+	public double[][] executar(){
 		InicializarParticulas();
 		AvaliarParticulas(0);
 		ObterGbest(0);
@@ -155,19 +178,18 @@ public class PSO {
 			ObterGbest(i);
 			
 		}
-		System.out.println("melhor");
-//		particulas.get(g).AvaliarParticula(99, simulacaoHidroeletrica);
+		System.out.println("melhor : "+gbest);
 		
 		return vetorGbest[iteracoes-1];
 	}
 	
-	public void EnergiaArmazenadaMelhor(){
-		simulacaoHidroeletrica.definirVolumesFinais(particulas.get(g).getX()[99],3, 60);
-		simulacaoHidroeletrica.simularOperacaoEnergeticaPSO(60);
-		simulacaoHidroeletrica.determinaValorAgua(particulas.get(g).getValorAgua());
-		//simulacaoHidroeletrica.definirVolumesFinais(particulas.get(g).getX()[99], 3,60);
-		System.out.println("energia melhor-> "+simulacaoHidroeletrica.EnergiaArmazenada());
-	}
+//	public void EnergiaArmazenadaMelhor(){
+//		simulacaoHidroeletrica.definirVolumesFinais(particulas.get(g).getX()[99],3, 60);
+//		simulacaoHidroeletrica.simularOperacaoEnergeticaPSO(60);
+//		//simulacaoHidroeletrica.determinaValorAgua(particulas.get(g).getValorAgua());
+//		//simulacaoHidroeletrica.definirVolumesFinais(particulas.get(g).getX()[99], 3,60);
+//		System.out.println("energia melhor-> "+simulacaoHidroeletrica.EnergiaArmazenada());
+//	}
 	
 
 }

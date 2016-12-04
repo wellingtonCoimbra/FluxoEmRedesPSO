@@ -343,20 +343,32 @@ public class SistemaHidrotermicoPSO {
 	}
 	
 	
+        public double[] DefluenciasUsinasAMontante(NoHidroenergetico[] nosIntervaloAtual){
+            double[] defluenciaUsinasAmontante = new double[Usinas.size()];
+            for(int i=0;i<Usinas.size();i++){
+                if(i==0)
+                    defluenciaUsinasAmontante[i]=0;
+                else
+                    defluenciaUsinasAmontante[i]=nosIntervaloAtual[i-1].getVazaoDefluente();
+            }
+            return defluenciaUsinasAmontante;
+        }
+                
 	public double GeracaoHidraulica(NoHidroenergetico[] nosIntervaloAtual){
 
 		
 		
 //		volumefinal(lambda, nosIntervaloAtual); 
 		VolumeMedio(nosIntervaloAtual);			
-		double[] defluenciaUsinasAmontante = new double[Usinas.size()]; 
-		defluenciaUsinasAmontante=BalancoHidrico(nosIntervaloAtual); 
-		//System.out.println("antes resolucao");
-		double teste=ResolucaoDeConflitos(defluenciaUsinasAmontante, nosIntervaloAtual);
-		if(teste==1){
-			return 0;
-			}
+		double[] defluenciaUsinasAmontante = DefluenciasUsinasAMontante(nosIntervaloAtual); 
+//		defluenciaUsinasAmontante=BalancoHidrico(nosIntervaloAtual); 
+//		//System.out.println("antes resolucao");
+//		double teste=ResolucaoDeConflitos(defluenciaUsinasAmontante, nosIntervaloAtual);
+//		if(teste==1){
+//			return 0;
+//			}
 		//System.out.println("depois resolucao");
+                // fazer uma função que calcula as defluencias da usinas a montante
 		VazaoAfluente(nosIntervaloAtual, defluenciaUsinasAmontante);
 		geracaoHidraulicaMaximaContinua(nosIntervaloAtual);
 		LimitesVazaoTurbinada(nosIntervaloAtual); 
@@ -402,6 +414,11 @@ public class SistemaHidrotermicoPSO {
 		}
 		
 		double geracaoHidraulicaSistema=GeracaoHidraulica(nosIntervaloAtual);
+                double geracaoComplementar;
+		geracaoComplementar = Demanda - geracaoHidraulicaSistema;
+		if(geracaoComplementar<0)
+			geracaoComplementar=0;
+		intervaloHorizonte.setGeracaoComplementar(geracaoComplementar);
 		
 		intervaloHorizonte.setEnergiaArmazenadaSistema(EnergiaArmazenadaNoSistema(nosIntervaloAtual));
 		return geracaoHidraulicaSistema;

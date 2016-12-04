@@ -19,6 +19,7 @@ public class GravarPSO {
         arq = new FileWriter("c:\\Users\\Wellington\\Desktop\\GeracaoHidraulicaPSO.txt");
         gravarArq = new PrintWriter(arq);
         gravarGeracaoHidraulica(sistema.getHorizontePlanejamento(), intervalos, numUsina);
+        gravarGeracaoComplementar(sistema.getHorizontePlanejamento(), intervalos, numUsina);
 //		gravarEnergiaArmazenadaNoSistema(sistema.getHorizontePlanejamento(),intervalos,numUsina);
         gravarVolumeInicial(sistema.getNos(), intervalos, numUsina);
         gravarVolumefinal(sistema.getNos(), intervalos, numUsina);
@@ -51,6 +52,16 @@ public class GravarPSO {
 
         }
     }
+    
+    public void gravarGeracaoComplementar(HorizontePlanejamento GeracaoComplementar, int intervalos, int numUsina) {
+
+		gravarArq.printf("%n%n%n+------- geracao Complementar ------+%n");
+		for (int j = 0; j < intervalos; j++) {
+			gravarArq.printf("%.10f", GeracaoComplementar.getIntervalos().get(j).getGeracaoComplementar());
+			gravarArq.println("");
+
+		}
+	}
 
     public void gravarVolumeInicial(NoHidroenergetico[][] volumeInicial, int intervalos, int numUsina) {
 

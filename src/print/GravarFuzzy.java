@@ -8,7 +8,7 @@ public class GravarFuzzy {
 	FileWriter arq;
 	PrintWriter gravarArq ;
 	public void gravarVolumes(double[][] volumes) throws IOException{
-		arq= new FileWriter("c:\\Users\\Wellington\\Desktop\\Dados teste Simulação hidreletrica\\fuzzy.txt");
+		arq= new FileWriter("c:\\Users\\Wellington\\Desktop\\Dados teste Simulacao hidreletrica\\fuzzy.txt");
 		gravarArq= new PrintWriter(arq);
 		gravarEmborcacao(volumes[0]);
 		gravarItumbiara(volumes[1]);
@@ -43,7 +43,7 @@ public class GravarFuzzy {
 	
 	public void gravarSaoSimao(double[] volumes){
 		double volumeOperativo=0;
-		gravarArq.printf("%n%n%n+------- Volume Operativo São Simão ------+%n");
+		gravarArq.printf("%n%n%n+------- Volume Operativo Sï¿½o Simï¿½o ------+%n");
 
 		for(int i=0;i<=1000;i++){
 			//volumeOperativo= volumes[i]*(12540-7000)+7000;

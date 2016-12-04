@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import horizonte.HorizontePlanejamento;
 import horizonte.IntervaloDeHorizonte;
-import print.Gravar;
 import print.GravarPSO;
 import rede.NoHidroenergetico;
 import usina.Usina;
@@ -60,19 +59,33 @@ public class SimulacaoOperacaoEnergeticaPSO {
 		
 	}
 	
-	public void definirVolumesFinais(double[]	volumes,int numUsinas,int numIntervalos){
+	public void definirVolumesFinais(double[][] volumes,int numUsinas,int numIntervalos){
 		//HorizontePlanejamento.setNumeroIntervalos(5);
 		int aux;
 		for(int i=0;i<numUsinas;i++){
-			aux=i*60;
+			//aux=i*60;
 			for(int j=0;j<numIntervalos;j++){
-				nos[j][i].setVolumeFinal(volumes[aux]);
-				aux++;
+				nos[j][i].setVolumeFinal(volumes[i][j]);
+				//aux++;
 			}
 		}
 		
 		
 	}
+        
+        public void definirVazoesDefluentes(double[][] vazoes, int numUsinas,int numIntervalos){
+            
+            int aux;
+            aux = numUsinas;
+            for(int i=0;i<numUsinas;i++){
+			//aux=i*60;
+			for(int j=0;j<numIntervalos;j++){
+                            // Ã© acrescentado o numIntervalos pq a posicao das vazoes estao depois dos volumes
+				nos[j][i].setVazaoDefluente(vazoes[i][j+numIntervalos]);
+				//aux++;
+			}
+		}
+        }
 	
 	public void definirVazoesAfluentesNaturais(double Afluencias[][],int numUsinas,int numIntervalos){
 		//HorizontePlanejamento.setNumeroIntervalos(5);
@@ -126,7 +139,7 @@ public class SimulacaoOperacaoEnergeticaPSO {
 	
 	
 	
-	//metodo de simulação da geração
+	//metodo de simulaï¿½ï¿½o da geraï¿½ï¿½o
 //	public double simularOperacaoEnergetica(double[] demanda,int numIntervalos){
 //		double EASM=SistemaHidroeletrico.EnergiaArmazenadaMaximaNoSistema(nos[0]);
 //		double geracao=0;
@@ -149,7 +162,7 @@ public class SimulacaoOperacaoEnergeticaPSO {
 //	}
 	
 	
-	//metodo de simulação da geração com o PSO
+	//metodo de simulaï¿½ï¿½o da geraï¿½ï¿½o com o PSO
 		public double simularOperacaoEnergeticaPSO(int numIntervalos){
 			//double EASM=SistemaHidroeletrico.EnergiaArmazenadaMaximaNoSistema(nos[0]);
 			double geracao=0;
@@ -160,23 +173,23 @@ public class SimulacaoOperacaoEnergeticaPSO {
 					
 					geracao=SistemaHidroeletrico.Executar(i, demanda[i], nos[i],nos[i],HorizontePlanejamento.getIntervalos().get(i));
 					HorizontePlanejamento.getIntervalos().get(i).setGeracaoHidraulica(geracao);
-					if(demanda[i]<geracao){
+					if(demanda[i]>geracao){
 						custo=custo + Math.pow(demanda[i]-geracao,2);
 					}
-					if(geracao==0){
-						custo=custo+demanda[i]/2;
-					}
+//					if(geracao==0){
+//						custo=custo+demanda[i]/2;
+//					}
 					System.out.println("intervalo " +i+" geracao "+geracao);
 				}
 				else{
 					geracao=SistemaHidroeletrico.Executar(i, demanda[i], nos[i],nos[i-1],HorizontePlanejamento.getIntervalos().get(i));
 					HorizontePlanejamento.getIntervalos().get(i).setGeracaoHidraulica(geracao);
-					if(demanda[i]<geracao){
+					if(demanda[i] > geracao){
 						custo=custo + Math.pow(demanda[i]-geracao,2);
 					}
-					if(geracao==0){
-						custo=custo+demanda[i]/2;
-					}
+//					if(geracao==0){
+//						custo=custo+demanda[i]/2;
+//					}
 					System.out.println("intervalo " +i+" geracao "+geracao);
 				}
 				}
@@ -195,17 +208,17 @@ public class SimulacaoOperacaoEnergeticaPSO {
 		return energia;
 	}
 	
-	public void determinaValorAgua(double[] valorAgua){
-		double customarginalop;
-		for(int i=0; i<SistemaHidroeletrico.getUsinas().size();i++){
-			for(int j=0;j<60;j++){
-				customarginalop=(-1)*(demanda[j]-this.getHorizontePlanejamento().getIntervalos().get(j).getGeracaoHidraulica()
-						);
-				valorAgua[i*60+j]=(-1)*(demanda[j]-this.getHorizontePlanejamento().getIntervalos().get(j).getGeracaoHidraulica()
-						)*(nos[j][i].getAlturaQuedaLiquida()*this.getSistemaHidroeletrico().getUsinas().get(i).getK());
-			}
-		}
-	}
+//	public void determinaValorAgua(double[] valorAgua){
+//		double customarginalop;
+//		for(int i=0; i<SistemaHidroeletrico.getUsinas().size();i++){
+//			for(int j=0;j<60;j++){
+//				customarginalop=(-1)*(demanda[j]-this.getHorizontePlanejamento().getIntervalos().get(j).getGeracaoHidraulica()
+//						);
+//				valorAgua[i*60+j]=(-1)*(demanda[j]-this.getHorizontePlanejamento().getIntervalos().get(j).getGeracaoHidraulica()
+//						)*(nos[j][i].getAlturaQuedaLiquida()*this.getSistemaHidroeletrico().getUsinas().get(i).getK());
+//			}
+//		}
+//	}
 
 	public SistemaHidrotermicoPSO getSistemaHidroeletrico() {
 		return SistemaHidroeletrico;
