@@ -2,6 +2,7 @@ package PsoGeracaoHidroeletrica;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import simulacao.CarregarSistema;
 //import simulacao.SimulacaoOperacaoEnergetica;
@@ -81,7 +82,10 @@ public class PSO {
 	
 	
 	public void AtualizarVelocidade(int iteracao){
-		
+		          Random geradorAleatorior1 = new Random();
+                          r1 = geradorAleatorior1.nextDouble();
+                          Random geradorAleatorior2 = new Random();
+                          r2 = geradorAleatorior2.nextDouble();
 		
 		for(int i=0;i<numeroParticulas;i++){
 			particulas.get(i).AtualizarVelocidade(simulacaoHidroeletrica,iteracao, c1, c2, r1, r2, vetorGbest);
