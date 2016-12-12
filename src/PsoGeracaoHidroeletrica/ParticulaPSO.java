@@ -67,10 +67,16 @@ public class ParticulaPSO {
 //                        //ajustar os valores da vazão defluente com relação ao volume
 //                        posicao[0][j][k] = simulacao.getNos()[k-numIntervalos][j].getVazaoAfluenteNatural();   
 //                    }
-                    inicializarVazoes(posicao[0], numIntervalos, numUsinas, simulacao);
+
+                    //inicializarVazoes(posicao[0], numIntervalos, numUsinas, simulacao);
                 }
-                
-		
+                double[][] volumeInicial= volumeInicial(posicao[0], numIntervalos, numUsinas);
+                double[][] vazaoDefluenteAmontante = inicializarVazoes(volumeInicial, posicao[0], numIntervalos, numUsinas, simulacao);
+                int teste = ResolucaoDeConflitos(volumeInicial, posicao[0], vazaoDefluenteAmontante, simulacao, numUsinas, numIntervalos);
+		while(teste == 1){
+                    vazaoDefluenteAmontante =  inicializarVazoes(volumeInicial, posicao[0], numIntervalos, numUsinas, simulacao);
+                    teste = ResolucaoDeConflitos(volumeInicial, posicao[0], vazaoDefluenteAmontante, simulacao, numUsinas, numIntervalos);
+                }
 //		for(int j=0;j<dimensao;j++){
 //			//gerar a parte decimal
 //			double decimal=geradorposicao.nextDouble();
@@ -97,8 +103,7 @@ public class ParticulaPSO {
 		
 	}
         
-        
-        public void inicializarVazoes(double[][] volumevazao,int numintervalos,int numUsinas,SimulacaoOperacaoEnergeticaPSO simulacao){
+        public double[][] volumeInicial(double[][] volumevazao,int numintervalos,int numUsinas){
             double[][] volumeinicial=new double[numUsinas][numintervalos];
             for(int i=0;i<numUsinas;i++){
                 for(int j=0;j<numintervalos;j++){
@@ -110,13 +115,20 @@ public class ParticulaPSO {
                     }
                 }    
             }
+            return volumeinicial;
+        }
+        
+        public double[][] inicializarVazoes(double[][] volumeinicial,double[][] volumevazao,int numintervalos,int numUsinas,SimulacaoOperacaoEnergeticaPSO simulacao){
+           
+            double[][] vazaoDefluenteAmontante = new double[numUsinas][numintervalos];
+           
             for(int i=0;i<numUsinas;i++){
                 for(int j=numintervalos;j<numintervalos*2;j++){
-                    double vazaoDefluenteAmontante=0;
+                    //double vazaoDefluenteAmontante=0;
                     if(i!=0){
-                        vazaoDefluenteAmontante = volumevazao[i-1][j];
+                        vazaoDefluenteAmontante[i][j-numintervalos] = volumevazao[i-1][j];
                     }
-                    double vazaoDefluente=(1000000.0/2628000)*((simulacao.getNos()[j-numintervalos][i].getVazaoAfluenteNatural() + vazaoDefluenteAmontante)*(2628000/1000000) +
+                    double vazaoDefluente=(1000000.0/2628000)*((simulacao.getNos()[j-numintervalos][i].getVazaoAfluenteNatural() + vazaoDefluenteAmontante[i][j-numintervalos])*(2628000/1000000) +
 					volumeinicial[i][j-numintervalos] - volumevazao[i][j-numintervalos]); //fator a direita esta tudo em volume e o fator a esquerda para transformar em vaz�o
 			
                     BigDecimal bd = new BigDecimal(vazaoDefluente).setScale(11, RoundingMode.HALF_EVEN);
@@ -125,9 +137,51 @@ public class ParticulaPSO {
               
                 }
             }    
-            
+            return vazaoDefluenteAmontante;
                 
         }
+        
+        public int ResolucaoDeConflitos(double[][] volumeinicial,double[][] volumevazao,double[][] defluenciaUsinasAmontante,SimulacaoOperacaoEnergeticaPSO simulacao,int numUsinas,int numIntervalos){
+		
+	int teste=0;
+        int tamVolumevazao= numIntervalos*2;
+	double tolerancia=0.0000000001;
+		for(int i=0;i<numUsinas;i++){
+                    for(int j=numIntervalos;j<tamVolumevazao;j++){
+			//if(!(Usinas.get(i) instanceof UsinaFioDagua)){
+			double limiteMinimoDefluente= simulacao.getNos()[0][i].getLimiteMinimoVazaoDefluente();
+			double limiteMaximoDefluente=simulacao.getNos()[0][i].getLimiteMaximoVazaoDefluente();
+			double vazaoDefluente=volumevazao[i][j];
+			double volumeFinal;
+			//double volumeinicial= volumevazao;
+			double vazaoIncremental=simulacao.getNos()[j-numIntervalos][i].getVazaoAfluenteIncremental();
+			//double volumeEvaporado=nosIntervaloAtual[i].getVolumeEvaporado();
+
+			
+			if((vazaoDefluente<limiteMinimoDefluente)||(vazaoDefluente>limiteMaximoDefluente)){
+				teste=1;
+				if(vazaoDefluente<limiteMinimoDefluente){
+					vazaoDefluente=limiteMinimoDefluente;
+				}
+				else{
+					vazaoDefluente=limiteMaximoDefluente;
+				}
+			
+				volumeFinal=volumeinicial[i][j-numIntervalos] + (vazaoIncremental +  defluenciaUsinasAmontante[i][j-numIntervalos] - vazaoDefluente)*(2628000.0/1000000);
+				//nosIntervaloAtual[i].setVolumeFinal(volumeFinal);
+                                volumevazao[i][j-numIntervalos]=volumeFinal;
+				//VolumeMedio(nosIntervaloAtual);
+				//double volumeMedio=Usinas.get(i).VolumeMedio(volumeFinal, volume);
+				//nosIntervaloAtual[i].setVazaoDefluente(vazaoDefluente);
+                                return teste;
+                        }
+		}
+			//nosIntervaloAtual[i].setVolumeMedio(volumeMedio);
+			//BalancoHidrico(nosIntervaloAtual);
+//}
+	}
+		return teste;
+	}
 	
 	public void AtualizarVelocidade(SimulacaoOperacaoEnergeticaPSO simulacao,int iteracao,double c1,double c2,double r1,double r2,double[][][] xxx){
             int numUsinas=posicaomin.length;
@@ -242,6 +296,30 @@ public class ParticulaPSO {
 	public void setXx(double[][][] xx) {
 		this.vetorpbest = xx;
 	}
+
+    public double[][][] getVelocidade() {
+        return velocidade;
+    }
+
+    public void setVelocidade(double[][][] velocidade) {
+        this.velocidade = velocidade;
+    }
+
+    public double[][][] getPosicao() {
+        return posicao;
+    }
+
+    public void setPosicao(double[][][] posicao) {
+        this.posicao = posicao;
+    }
+
+    public double[][][] getVetorpbest() {
+        return vetorpbest;
+    }
+
+    public void setVetorpbest(double[][][] vetorpbest) {
+        this.vetorpbest = vetorpbest;
+    }
 
 
 	
