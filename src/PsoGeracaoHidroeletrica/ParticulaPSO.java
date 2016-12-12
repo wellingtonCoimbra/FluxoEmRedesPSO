@@ -1,6 +1,9 @@
 package PsoGeracaoHidroeletrica;
 
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Random;
 import simulacao.SimulacaoOperacaoEnergeticaPSO;
 
 public class ParticulaPSO {
@@ -54,12 +57,17 @@ public class ParticulaPSO {
                 
                 for(int j = 0;j<numUsinas;j++){
                     for(int k = 0 ; k < numIntervalos;k++){
-                        posicao[0][j][k] = xmaxvolume[j];
+                        Random gerador= new Random();
+                        double valor = (gerador.nextInt(10)+ 90 + gerador.nextDouble() )/100.0; 
+                        
+                        posicao[0][j][k] = xmaxvolume[j]*valor;
                     }
-                    for(int k = numIntervalos ; k < volumeVazao;k++){
-                        //apenas a natural pq as usinas a montante defluem tudo que chegam nelas, portanto acaba sendo a natural
-                        posicao[0][j][k] = simulacao.getNos()[k-numIntervalos][j].getVazaoAfluenteNatural();   
-                    }
+//                    for(int k = numIntervalos ; k < volumeVazao;k++){
+//                        //apenas a natural pq as usinas a montante defluem tudo que chegam nelas, portanto acaba sendo a natural
+//                        //ajustar os valores da vazão defluente com relação ao volume
+//                        posicao[0][j][k] = simulacao.getNos()[k-numIntervalos][j].getVazaoAfluenteNatural();   
+//                    }
+                    inicializarVazoes(posicao[0], numIntervalos, numUsinas, simulacao);
                 }
                 
 		
@@ -88,6 +96,38 @@ public class ParticulaPSO {
 //		}
 		
 	}
+        
+        
+        public void inicializarVazoes(double[][] volumevazao,int numintervalos,int numUsinas,SimulacaoOperacaoEnergeticaPSO simulacao){
+            double[][] volumeinicial=new double[numUsinas][numintervalos];
+            for(int i=0;i<numUsinas;i++){
+                for(int j=0;j<numintervalos;j++){
+                    if(j==0){
+                        volumeinicial[i][j] = posicaomax[i][j];
+                    }
+                    else{
+                        volumeinicial[i][j] = volumevazao[i][j-1];
+                    }
+                }    
+            }
+            for(int i=0;i<numUsinas;i++){
+                for(int j=numintervalos;j<numintervalos*2;j++){
+                    double vazaoDefluenteAmontante=0;
+                    if(i!=0){
+                        vazaoDefluenteAmontante = volumevazao[i-1][j];
+                    }
+                    double vazaoDefluente=(1000000.0/2628000)*((simulacao.getNos()[j-numintervalos][i].getVazaoAfluenteNatural() + vazaoDefluenteAmontante)*(2628000/1000000) +
+					volumeinicial[i][j-numintervalos] - volumevazao[i][j-numintervalos]); //fator a direita esta tudo em volume e o fator a esquerda para transformar em vaz�o
+			
+                    BigDecimal bd = new BigDecimal(vazaoDefluente).setScale(11, RoundingMode.HALF_EVEN);
+                    vazaoDefluente=bd.doubleValue();
+                    volumevazao[i][j]=vazaoDefluente;
+              
+                }
+            }    
+            
+                
+        }
 	
 	public void AtualizarVelocidade(SimulacaoOperacaoEnergeticaPSO simulacao,int iteracao,double c1,double c2,double r1,double r2,double[][][] xxx){
             int numUsinas=posicaomin.length;
