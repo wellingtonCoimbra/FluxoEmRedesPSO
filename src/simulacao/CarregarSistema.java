@@ -282,7 +282,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 
 	}
 
-	public void UsinasMinas(SimulacaoOperacaoEnergeticaPSO sistema){
+	public void UsinasMinas(SimulacaoOperacaoEnergeticaPSO sistema)throws IOException{
 		int numUsina=3;
 		
 		
@@ -415,7 +415,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 		//definindo as usinas a jusantes de cada uma
 		Emborcacao.getUsinaAJusante().add(Itumbiara);
-		Emborcacao.getUsinaAJusante().add(SaoSimao);;
+		Emborcacao.getUsinaAJusante().add(SaoSimao);
 		Itumbiara.getUsinaAJusante().add(SaoSimao);
 		
 		//definindo as usinas a montante de cada uma
@@ -441,7 +441,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 		//------- afluencia de Emborcao------
 		try { 
-			FileReader arq = new FileReader("C:\\Users\\Wellington\\Documents\\Estudo-Projetos atual\\Vaz�es Afluentes Usinas sudeste atualizada\\1936-1941\\Emborca��o.txt");
+			FileReader arq = new FileReader("C:\\Users\\Wellington\\Documents\\Estudo-Projetos atual\\Vazões Afluentes Usinas sudeste atualizada\\1936-1941\\Emborcação.txt");
 			BufferedReader lerArq = new BufferedReader(arq); 
 			String linha = lerArq.readLine(); 
 			int i=0;
@@ -462,7 +462,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 		//------- afluencia de Itumbiara------
 				try { 
-					FileReader arq = new FileReader("C:\\Users\\Wellington\\Documents\\Estudo-Projetos atual\\Vaz�es Afluentes Usinas sudeste atualizada\\1936-1941\\Itumbiara.txt");
+					FileReader arq = new FileReader("C:\\Users\\Wellington\\Documents\\Estudo-Projetos atual\\Vazões Afluentes Usinas sudeste atualizada\\1936-1941\\Itumbiara.txt");
 					BufferedReader lerArq = new BufferedReader(arq); 
 					String linha = lerArq.readLine(); 
 					int i=0;
@@ -484,7 +484,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 				//------- afluencia de S�o Sim�o------
 				try { 
-					FileReader arq = new FileReader("C:\\Users\\Wellington\\Documents\\Estudo-Projetos atual\\Vaz�es Afluentes Usinas sudeste atualizada\\1936-1941\\S�o Sim�o.txt");
+					FileReader arq = new FileReader("C:\\Users\\Wellington\\Documents\\Estudo-Projetos atual\\Vazões Afluentes Usinas sudeste atualizada\\1936-1941\\São Simão.txt");
 					BufferedReader lerArq = new BufferedReader(arq); 
 					String linha = lerArq.readLine(); 
 					int i=0;
