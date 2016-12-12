@@ -43,7 +43,7 @@ public class PSO {
 		this.c2=c2;
 		simulacaoHidroeletrica=new SimulacaoOperacaoEnergeticaPSO(Intervalos,demanda);
 		try {
-			carregar.testarSimulacaoUsinasReservatorio(simulacaoHidroeletrica);
+			carregar.UsinasMinas(simulacaoHidroeletrica);
                         inicializaLimitesVolumeVazao(simulacaoHidroeletrica);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -182,10 +182,30 @@ public class PSO {
 			ObterGbest(i);
 			
 		}
-		System.out.println("melhor : "+gbest);
-		
+		//System.out.println("melhor : "+gbest);
+		imprimirParticula(0);
 		return vetorGbest[iteracoes-1];
 	}
+        
+        public void imprimirParticula(int indiceparticula){
+//            for(int i=0;i<numUsinas;i++){
+//                System.out.println("");
+//                System.out.println("Usina " + (i+1));
+//                for(int j=0;j<numIntervalos;j++){
+//                    System.out.print(particulas.get(indiceparticula).getPosicao()[0][i][j]+", ");
+//                }
+//                
+//            }
+//            for(int i=0;i<numUsinas;i++){
+//                System.out.println("");
+//                System.out.println("Usina " + (i+1));
+//                for(int j=numIntervalos;j<numIntervalos*2;j++){
+//                    System.out.print(particulas.get(indiceparticula).getPosicao()[0][i][j]+", ");
+//                }
+//                
+//            }
+            
+        }
 	
 //	public void EnergiaArmazenadaMelhor(){
 //		simulacaoHidroeletrica.definirVolumesFinais(particulas.get(g).getX()[99],3, 60);

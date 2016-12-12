@@ -54,13 +54,16 @@ public class ParticulaPSO {
                         velocidademax[j][k] = (xmaxvazao[j] - xminvazao[j])/iteracao;
 			}
                 }
-                
+                System.out.println("Volumes");
                 for(int j = 0;j<numUsinas;j++){
+                    System.out.println("Usinas "+(j+1));
                     for(int k = 0 ; k < numIntervalos;k++){
                         Random gerador= new Random();
                         double valor = (gerador.nextInt(10)+ 90 + gerador.nextDouble() )/100.0; 
+                        //System.out.println(valor);
                         
                         posicao[0][j][k] = xmaxvolume[j]*valor;
+                        System.out.println(posicao[0][j][k]);
                     }
 //                    for(int k = numIntervalos ; k < volumeVazao;k++){
 //                        //apenas a natural pq as usinas a montante defluem tudo que chegam nelas, portanto acaba sendo a natural
@@ -74,8 +77,17 @@ public class ParticulaPSO {
                 double[][] vazaoDefluenteAmontante = inicializarVazoes(volumeInicial, posicao[0], numIntervalos, numUsinas, simulacao);
                 int teste = ResolucaoDeConflitos(volumeInicial, posicao[0], vazaoDefluenteAmontante, simulacao, numUsinas, numIntervalos);
 		while(teste == 1){
+                    //System.out.println("teste == 1");
+                    volumeInicial= volumeInicial(posicao[0], numIntervalos, numUsinas);
                     vazaoDefluenteAmontante =  inicializarVazoes(volumeInicial, posicao[0], numIntervalos, numUsinas, simulacao);
                     teste = ResolucaoDeConflitos(volumeInicial, posicao[0], vazaoDefluenteAmontante, simulacao, numUsinas, numIntervalos);
+                }
+                System.out.println("volumes finais");
+                for(int j=0;j<numUsinas;j++){
+                    System.out.println("Usina "+ (j+1));
+                    for(int k=0;k<numIntervalos;k++){
+                        System.out.println(posicao[0][j][k]);
+                    }
                 }
 //		for(int j=0;j<dimensao;j++){
 //			//gerar a parte decimal
@@ -105,6 +117,7 @@ public class ParticulaPSO {
         
         public double[][] volumeInicial(double[][] volumevazao,int numintervalos,int numUsinas){
             double[][] volumeinicial=new double[numUsinas][numintervalos];
+            //System.out.println("volume inicial");
             for(int i=0;i<numUsinas;i++){
                 for(int j=0;j<numintervalos;j++){
                     if(j==0){
@@ -113,6 +126,7 @@ public class ParticulaPSO {
                     else{
                         volumeinicial[i][j] = volumevazao[i][j-1];
                     }
+                    //System.out.println(volumeinicial[i][j]);
                 }    
             }
             return volumeinicial;
@@ -153,12 +167,30 @@ public class ParticulaPSO {
 			double limiteMaximoDefluente=simulacao.getNos()[0][i].getLimiteMaximoVazaoDefluente();
 			double vazaoDefluente=volumevazao[i][j];
 			double volumeFinal;
+//                        System.out.println("intervalo: "+(j-numIntervalos));
+//                        System.out.println("Usina: "+(i+1));
+//                        System.out.println("vazaoDefluente: "+volumevazao[i][j]);
+//                        System.out.println("volume inicial: " +volumeinicial[i][j-numIntervalos]);
+//                        System.out.println("volume final antes de alterar: "+volumevazao[i][j-numIntervalos]);
+                        
+                            
 			//double volumeinicial= volumevazao;
-			double vazaoIncremental=simulacao.getNos()[j-numIntervalos][i].getVazaoAfluenteIncremental();
+                        double vazaoNaturalUsinasAmontante=0;
+                        if(i!=0){
+                            vazaoNaturalUsinasAmontante = simulacao.getNos()[j-numIntervalos][i-1].getVazaoAfluenteNatural();
+                        }
+                        
+                        double vazaoIncremental=simulacao.getNos()[j-numIntervalos][i].getVazaoAfluenteNatural()- vazaoNaturalUsinasAmontante;
 			//double volumeEvaporado=nosIntervaloAtual[i].getVolumeEvaporado();
-
+                       // System.out.println("vazao incremental: "+vazaoIncremental);
 			
 			if((vazaoDefluente<limiteMinimoDefluente)||(vazaoDefluente>limiteMaximoDefluente)){
+                            System.out.println("intervalo: "+(j-numIntervalos));
+                            System.out.println("Usina: "+(i+1));
+                            System.out.println("vazaoDefluente: "+volumevazao[i][j]);
+                            System.out.println("volume inicial: " +volumeinicial[i][j-numIntervalos]);
+                            System.out.println("volume final antes de alterar: "+volumevazao[i][j-numIntervalos]);
+                            System.out.println("vazao incremental: "+vazaoIncremental);
 				teste=1;
 				if(vazaoDefluente<limiteMinimoDefluente){
 					vazaoDefluente=limiteMinimoDefluente;
@@ -166,10 +198,12 @@ public class ParticulaPSO {
 				else{
 					vazaoDefluente=limiteMaximoDefluente;
 				}
-			
+                            System.out.println("vazao defluente: "+vazaoDefluente);    
 				volumeFinal=volumeinicial[i][j-numIntervalos] + (vazaoIncremental +  defluenciaUsinasAmontante[i][j-numIntervalos] - vazaoDefluente)*(2628000.0/1000000);
 				//nosIntervaloAtual[i].setVolumeFinal(volumeFinal);
                                 volumevazao[i][j-numIntervalos]=volumeFinal;
+                                System.out.println("volume final depois de alterar: "+volumeFinal);
+
 				//VolumeMedio(nosIntervaloAtual);
 				//double volumeMedio=Usinas.get(i).VolumeMedio(volumeFinal, volume);
 				//nosIntervaloAtual[i].setVazaoDefluente(vazaoDefluente);
