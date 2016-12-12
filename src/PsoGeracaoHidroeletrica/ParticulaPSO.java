@@ -142,7 +142,7 @@ public class ParticulaPSO {
                     if(i!=0){
                         vazaoDefluenteAmontante[i][j-numintervalos] = volumevazao[i-1][j];
                     }
-                    double vazaoDefluente=(1000000.0/2628000)*((simulacao.getNos()[j-numintervalos][i].getVazaoAfluenteNatural() + vazaoDefluenteAmontante[i][j-numintervalos])*(2628000/1000000) +
+                    double vazaoDefluente=(1000000.0/2628000.0)*((simulacao.getNos()[j-numintervalos][i].getVazaoAfluenteNatural() + vazaoDefluenteAmontante[i][j-numintervalos])*(2628000.0/1000000.0) +
 					volumeinicial[i][j-numintervalos] - volumevazao[i][j-numintervalos]); //fator a direita esta tudo em volume e o fator a esquerda para transformar em vaz�o
 			
                     BigDecimal bd = new BigDecimal(vazaoDefluente).setScale(11, RoundingMode.HALF_EVEN);
