@@ -33,6 +33,7 @@ public class FluxoEmRede {
     int[][] MIVB;
     ArrayList<Arco> superBasicos;
     int[] usinasJusante;
+    double PassoMaximo;
 
     public FluxoEmRede(int numUsinas, int numIntervalos, double[][] rede, double[] Volumemin, double[] Volumemax, double[] vazaoMin, double[] vazaoMax, double demanda) {
         this.numUsinas = numUsinas;
@@ -112,40 +113,48 @@ public class FluxoEmRede {
     }
 
     public void ParticaoEPATEC() {
-        simulacaoHidroeletrica.definirVolumesFinais(rede, numUsinas, numIntervalos);
-        simulacaoHidroeletrica.definirVazoesDefluentes(rede, numUsinas, numIntervalos);
-        ArrayList<IntervaloDeHorizonte> IntervalosHorizonte = simulacaoHidroeletrica.getHorizontePlanejamento().getIntervalos();
-
         for (int i = 0; i < numIntervalos; i++) {
+            simulacaoHidroeletrica.definirVolumesFinais(rede, numUsinas, numIntervalos);
+            simulacaoHidroeletrica.definirVazoesDefluentes(rede, numUsinas, numIntervalos);
+            simulacaoHidroeletrica.simularOperacaoEnergeticaPSO(numIntervalos);
+            ArrayList<IntervaloDeHorizonte> IntervalosHorizonte = simulacaoHidroeletrica.getHorizontePlanejamento().getIntervalos();
+
             superBasicos.clear();
             int menor = i;
             int maior = IntervaloDiferencaCustoMarginal(i, IntervalosHorizonte);
             Arco arcobasico;
-            for (int j = 0; j < numUsinas; j++) {
+            for (int usina = 0; usina < numUsinas; usina++) {
                 //colocando as defluencias do intervalo maior como basicas
-                arcobasico = new Arco(j, maior, usinasJusante[j], maior);
-                arcosBasicos.add(arcobasico);
-                MIVB[j][maior] = 1;
-                //colocando as defluencias do intervalo menor como superbasicas
-                if ((rede[j][menor] != volumeMax[j]) && (rede[j][menor] != volumeMin[j])) {
-                    superBasicos.add(new Arco(j, menor, usinasJusante[j], menor));
+                if(rede[usina][maior + numIntervalos] != vazaoMin[usina]){
+                    arcobasico = new Arco(usina, maior, usinasJusante[usina], maior);
+                    arcosBasicos.add(arcobasico);
+                    MIVB[usina][maior] = 1;
                 }else{
-                     superBasicos.add(new Arco(j,menor,j,menor + 1));
+                    arcobasico = new Arco(usina, maior, usina, (maior+1));
+                    arcosBasicos.add(arcobasico);
+                    MIVB[usina][maior] = 0;
+                }
+                //colocando as defluencias do intervalo menor como superbasicas
+                if ((rede[usina][menor] != volumeMax[usina]) && (rede[usina][menor] != volumeMin[usina])) {
+                    superBasicos.add(new Arco(usina, menor, usinasJusante[usina], menor));
+                }else{
+                     superBasicos.add(new Arco(usina,menor,usina,menor + 1));
                 }
                 //colocando se possivel os volumes ao longo do intervalo menor e maior
                 for (int k = menor; k < maior; k++) {
-                    if (rede[j][k] == volumeMax[j] || rede[j][k] == volumeMin[j]) {
+                    if (rede[usina][k] == volumeMax[usina] || rede[usina][k] == volumeMin[usina]) {
                         //defluencia
-                        MIVB[j][k] = 1;
-                        arcosBasicos.add(new Arco(j, k, usinasJusante[j], k));
+                        MIVB[usina][k] = 1;
+                        arcosBasicos.add(new Arco(usina, k, usinasJusante[usina], k));
                     } else {
                         //volume
-                        arcosBasicos.add(new Arco(j, k, j, k + 1));
-                        MIVB[j][k] = 0;
+                        arcosBasicos.add(new Arco(usina, k, usina, k + 1));
+                        MIVB[usina][k] = 0;
                     }
 
                 }
             }
+            detectarCiclos();
             DirecaoDeCaminhadaArcosSuperBasicos();
             ProjecaoDeCaminhadaArcosSuperBasicos();
             DirecaoDeCaminhadaArcosBasicos();
@@ -157,19 +166,26 @@ public class FluxoEmRede {
 
     public void ParticaoEPATEU() {
         //arcosBasicos.clear();
-        simulacaoHidroeletrica.definirVolumesFinais(rede, numUsinas, numIntervalos);
-        simulacaoHidroeletrica.definirVazoesDefluentes(rede, numUsinas, numIntervalos);
-        ArrayList<IntervaloDeHorizonte> IntervalosHorizonte = simulacaoHidroeletrica.getHorizontePlanejamento().getIntervalos();
         for (int intervaloUsina = 0; intervaloUsina < numIntervalos; intervaloUsina++) {
             for (int usina = 0; usina < numUsinas; usina++) {
+                simulacaoHidroeletrica.definirVolumesFinais(rede, numUsinas, numIntervalos);
+                simulacaoHidroeletrica.definirVazoesDefluentes(rede, numUsinas, numIntervalos);
+                simulacaoHidroeletrica.simularOperacaoEnergeticaPSO(numIntervalos);
+                ArrayList<IntervaloDeHorizonte> IntervalosHorizonte = simulacaoHidroeletrica.getHorizontePlanejamento().getIntervalos();
                 superBasicos.clear();
                 Arco arcobasico;
                 int menor = intervaloUsina;
                 int maior = IntervaloDiferencaCustoMarginal(intervaloUsina, IntervalosHorizonte);
                 //colocando as defluencias do intervalo maior como basicas
-                arcobasico = new Arco(usina, maior, usinasJusante[usina], maior);
-                arcosBasicos.add(arcobasico);
-                MIVB[usina][maior] = 1;
+                if(rede[usina][maior + numIntervalos] != vazaoMin[usina]){
+                    arcobasico = new Arco(usina, maior, usinasJusante[usina], maior);
+                    arcosBasicos.add(arcobasico);
+                    MIVB[usina][maior] = 1;
+                }else{
+                    arcobasico = new Arco(usina, maior, usina, (maior+1));
+                    arcosBasicos.add(arcobasico);
+                    MIVB[usina][maior] = 0;
+                }
                 //colocando se possivel a defluencia do intervalo menor como superbasicas
                 if ((rede[usina][menor] != volumeMax[usina]) && (rede[usina][menor] != volumeMin[usina])) {
                     superBasicos.add(new Arco(usina, menor, usinasJusante[usina], menor));
@@ -189,7 +205,7 @@ public class FluxoEmRede {
                     }
 
                 }
-                
+                detectarCiclos();
                 DirecaoDeCaminhadaArcosSuperBasicos();
                 ProjecaoDeCaminhadaArcosSuperBasicos();
                 DirecaoDeCaminhadaArcosBasicos();
@@ -278,6 +294,8 @@ public class FluxoEmRede {
     }
 
     public void DirecaoDeCaminhadaArcosBasicos() {
+        double fatorConversaoVAVO = 1000000.0/2628000.0;
+        double direcaoSuperBasico;
         for (int i = 0; i < arcosBasicos.size(); i++) {
             int indiceUsina = arcosBasicos.get(i).getOrigem()[0];
             int indiceIntervalo = arcosBasicos.get(i).getOrigem()[1];
@@ -298,15 +316,20 @@ public class FluxoEmRede {
                     if (MIVB[indiceUsina][indiceIntervalo] == 1) {
                         //verificando se o arco superbasico é de montante
                         if (MIVB[indiceUsinaSB][indiceIntervaloSB] == 1) {
-                            direcaoDeCaminhada[indiceUsina][numIntervalos + indiceIntervalo] = direcaoDeCaminhada[indiceUsina][numIntervalos + indiceIntervalo] + SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][indiceIntervaloSB];
+                            //direcaoSuperBasico = (SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][indiceIntervaloSB]*fatorConversaoVAVO); 
+                            direcaoDeCaminhada[indiceUsina][numIntervalos + indiceIntervalo] = direcaoDeCaminhada[indiceUsina][numIntervalos + indiceIntervalo] + (SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][indiceIntervaloSB]);
                         } else {
-                            direcaoDeCaminhada[indiceUsina][numIntervalos + indiceIntervalo] = direcaoDeCaminhada[indiceUsina][numIntervalos + indiceIntervalo] + SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][numIntervalos + indiceIntervaloSB];
+                            direcaoSuperBasico = (SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][indiceIntervaloSB + numIntervalos]*fatorConversaoVAVO); 
+                            direcaoDeCaminhada[indiceUsina][numIntervalos + indiceIntervalo] = direcaoDeCaminhada[indiceUsina][numIntervalos + indiceIntervalo] + direcaoSuperBasico;
                         }
-                    } else //verificando se o arco superbasico é de montante
-                    if (MIVB[indiceUsinaSB][indiceIntervaloSB] == 1) {
-                        direcaoDeCaminhada[indiceUsina][indiceIntervalo] = direcaoDeCaminhada[indiceUsina][indiceIntervalo] + SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][indiceIntervaloSB];
                     } else {
-                        direcaoDeCaminhada[indiceUsina][indiceIntervalo] = direcaoDeCaminhada[indiceUsina][indiceIntervalo] + SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][numIntervalos + indiceIntervaloSB];
+                        //verificando se o arco superbasico é de montante
+                        if (MIVB[indiceUsinaSB][indiceIntervaloSB] == 1) {
+                            direcaoDeCaminhada[indiceUsina][indiceIntervalo] = direcaoDeCaminhada[indiceUsina][indiceIntervalo] + SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][indiceIntervaloSB];
+                        } else {
+                            direcaoSuperBasico = (SinalDeConcordanciaDoArcoSB * direcaoDeCaminhada[indiceUsinaSB][numIntervalos + indiceIntervaloSB])*fatorConversaoVAVO;
+                            direcaoDeCaminhada[indiceUsina][indiceIntervalo] = direcaoDeCaminhada[indiceUsina][indiceIntervalo] + direcaoSuperBasico;
+                        }
                     }
                 }
 
@@ -339,29 +362,59 @@ public class FluxoEmRede {
 
     public void PassoMaximoDoCiclo() {
         PassoMaximoBasicoSuperBasico();
-        for (int i = 0; i < ciclos.size(); i++) {
-            double menor;
-            int indiceUsinaSB = ciclos.get(i).getSuperbasico().getOrigem()[0];
-            int indiceIntervaloSB = ciclos.get(i).getSuperbasico().getOrigem()[1];
-            if (MIVB[indiceUsinaSB][indiceIntervaloSB] == 1) {
-                menor = passoMaximo[indiceUsinaSB][indiceIntervaloSB];
-            } else {
-                menor = passoMaximo[indiceUsinaSB][numIntervalos + indiceIntervaloSB];
+        double menor = Double.MAX_VALUE;
+        for(int i = 0; i < superBasicos.size() ; i++){
+            int indiceUsinaSB = superBasicos.get(i).getOrigem()[0];
+            int indiceIntervaloSB = superBasicos.get(i).getOrigem()[1];
+            if(MIVB[indiceUsinaSB][indiceIntervaloSB] == 1){
+                if((passoMaximo[indiceUsinaSB][indiceIntervaloSB] < menor) && (passoMaximo[indiceUsinaSB][indiceIntervaloSB] != 0)){
+                    menor = passoMaximo[indiceUsinaSB][indiceIntervaloSB];
+                }
+            }else{
+                if((passoMaximo[indiceUsinaSB][indiceIntervaloSB + numIntervalos] < menor)&&(passoMaximo[indiceUsinaSB][indiceIntervaloSB + numIntervalos] != 0)){
+                    menor = passoMaximo[indiceUsinaSB][indiceIntervaloSB + numIntervalos];
+                }
+            
             }
-            for (int j = 0; j < ciclos.get(i).getArestasbasicas().size(); j++) {
-                int indiceUsina = ciclos.get(i).getArestasbasicas().get(j).getOrigem()[0];
-                int indiceIntervalo = ciclos.get(i).getArestasbasicas().get(j).getOrigem()[1];
-                if (MIVB[indiceUsina][indiceIntervalo] == 1) {
-                    if (menor < passoMaximo[indiceUsina][numIntervalos + indiceIntervalo]) {
-                        menor = passoMaximo[indiceUsina][numIntervalos + indiceIntervalo];
-                    }
-                } else if (menor < passoMaximo[indiceUsina][indiceIntervalo]) {
-                    menor = passoMaximo[indiceUsina][indiceIntervalo];
+        }
+        
+        for(int i = 0; i < arcosBasicos.size(); i++){
+            int indiceUsinaBA = arcosBasicos.get(i).getOrigem()[0];
+            int indiceIntervaloBA = arcosBasicos.get(i).getOrigem()[1];
+            if(MIVB[indiceUsinaBA][indiceIntervaloBA] == 1){
+                if((passoMaximo[indiceUsinaBA][indiceIntervaloBA] < menor) && (passoMaximo[indiceUsinaBA][indiceIntervaloBA] != 0)){
+                    menor = passoMaximo[indiceUsinaBA][indiceIntervaloBA];
+                }
+            }else{
+                if((passoMaximo[indiceUsinaBA][indiceIntervaloBA + numIntervalos] < menor) && (passoMaximo[indiceUsinaBA][indiceIntervaloBA + numIntervalos] != 0)){
+                    menor = passoMaximo[indiceUsinaBA][indiceIntervaloBA + numIntervalos];
                 }
             }
-
-            ciclos.get(i).setPassoMaximo(menor);
         }
+        PassoMaximo = menor;
+//        for (int i = 0; i < ciclos.size(); i++) {
+//            double menor;
+//            int indiceUsinaSB = ciclos.get(i).getSuperbasico().getOrigem()[0];
+//            int indiceIntervaloSB = ciclos.get(i).getSuperbasico().getOrigem()[1];
+//            if (MIVB[indiceUsinaSB][indiceIntervaloSB] == 1) {
+//                menor = passoMaximo[indiceUsinaSB][indiceIntervaloSB];
+//            } else {
+//                menor = passoMaximo[indiceUsinaSB][numIntervalos + indiceIntervaloSB];
+//            }
+//            for (int j = 0; j < ciclos.get(i).getArestasbasicas().size(); j++) {
+//                int indiceUsina = ciclos.get(i).getArestasbasicas().get(j).getOrigem()[0];
+//                int indiceIntervalo = ciclos.get(i).getArestasbasicas().get(j).getOrigem()[1];
+//                if (MIVB[indiceUsina][indiceIntervalo] == 1) {
+//                    if (menor < passoMaximo[indiceUsina][numIntervalos + indiceIntervalo]) {
+//                        menor = passoMaximo[indiceUsina][numIntervalos + indiceIntervalo];
+//                    }
+//                } else if (menor < passoMaximo[indiceUsina][indiceIntervalo]) {
+//                    menor = passoMaximo[indiceUsina][indiceIntervalo];
+//                }
+//            }
+//
+//            ciclos.get(i).setPassoMaximo(menor);
+//        }
     }
 
     private void PassoMaximoBasicoSuperBasico() {
