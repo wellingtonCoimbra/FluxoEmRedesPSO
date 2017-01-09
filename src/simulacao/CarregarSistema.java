@@ -434,7 +434,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 		
 		
-		int numIntervalos=60;
+		int numIntervalos=4;
 		double[][] afluencia=new double[numIntervalos][numUsina];	
 //Scanner ler = new Scanner(System.in);
 		
@@ -449,9 +449,12 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 			while (linha != null) {
 				//System.out.printf("%s\n", linha); 
 				//System.out.println("i = "+ i);
+                                
 				afluencia[i][0]=Double.parseDouble(linha);
 				//System.out.println(vetor[i]);
 				i++;
+                                if(i==3)
+                                    break;
 				linha = lerArq.readLine(); // l� da segunda at� a �ltima linha
 				} arq.close();
 				} catch (IOException e) { 
@@ -473,6 +476,8 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 						afluencia[i][1]=Double.parseDouble(linha);
 						//System.out.println(vetor[i]);
 						i++;
+                                                if(i==3)
+                                                    break;
 						linha = lerArq.readLine(); // l� da segunda at� a �ltima linha
 						} arq.close();
 						} catch (IOException e) { 
@@ -495,6 +500,8 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 						afluencia[i][2]=Double.parseDouble(linha);
 						//System.out.println(vetor[i]);
 						i++;
+                                                if(i==3)
+                                                    break;    
 						linha = lerArq.readLine(); // l� da segunda at� a �ltima linha
 						} arq.close();
 						} catch (IOException e) { 
