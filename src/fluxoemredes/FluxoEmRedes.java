@@ -6,6 +6,7 @@
 package fluxoemredes;
 
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -40,7 +41,8 @@ public class FluxoEmRedes {
         double[] vazaoMax = new double[numUsinas];
         double demanda = 2500;
         FluxoEmRede fluxoEmRedes = new FluxoEmRede(numUsinas, numIntervalos, rede,volumeMin, volumeMax, vazaoMin,vazaoMax,demanda);
-        for(int i = 0; i<3000;i++){
+        JOptionPane.showMessageDialog(null, "deu certo");
+        for(int i = 0; i<1;i++){
             fluxoEmRedes.ParticaoEPATEC();
             System.out.println("i : "+(i+1));
 //            fluxoEmRedes.detectarCiclos();

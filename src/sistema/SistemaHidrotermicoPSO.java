@@ -12,7 +12,7 @@ import usina.UsinaHidroeletrica;
 
 public class SistemaHidrotermicoPSO {
 	private ArrayList<UsinaHidroeletrica> Usinas=new ArrayList<UsinaHidroeletrica>();
-	private double tempo=2628000;
+	private double tempo = 2628000;
 	
 	public ArrayList<UsinaHidroeletrica> getUsinas() {
 		return Usinas;
@@ -355,8 +355,6 @@ public class SistemaHidrotermicoPSO {
         }
                 
 	public double GeracaoHidraulica(NoHidroenergetico[] nosIntervaloAtual){
-
-		
 		
 //		volumefinal(lambda, nosIntervaloAtual); 
 		VolumeMedio(nosIntervaloAtual);			
@@ -401,8 +399,8 @@ public class SistemaHidrotermicoPSO {
 		
 	}
 	
-	public double Executar(int intervalo,double Demanda,
-			NoHidroenergetico[] nosIntervaloAtual,NoHidroenergetico[] nosIntervaloanterior,IntervaloDeHorizonte intervaloHorizonte){
+	public double Executar(int intervalo,double Demanda, NoHidroenergetico[] nosIntervaloAtual,
+                               NoHidroenergetico[] nosIntervaloanterior,IntervaloDeHorizonte intervaloHorizonte){
 		CalcularAfluenciaIncremental(nosIntervaloAtual);
 		//o primeiro volume � iniciado como parametro
 		if(intervalo!=0){
@@ -422,8 +420,6 @@ public class SistemaHidrotermicoPSO {
 		
 		intervaloHorizonte.setEnergiaArmazenadaSistema(EnergiaArmazenadaNoSistema(nosIntervaloAtual));
 		return geracaoHidraulicaSistema;
-		
-		
 	}
 }
 

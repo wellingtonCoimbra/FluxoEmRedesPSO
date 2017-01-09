@@ -25,40 +25,52 @@ public class Ciclo {
    
    
    //verificar se a matriz rede não esta sendo utilizada
-   public void trilhaDestinoOrigem(int[][] MIVB,int[] usinasJusantes){
-        Arco arcoInicio1 = null;
-        Arco arcoInicio2 = null;
-         int numIntervalo = MIVB[0].length;
-        int numUsina = MIVB.length;
+    public void trilhaDestinoOrigem(int[][] MIVB,int[] usinasJusantes){
+        Arco arcoInicio1 = null;                // referente a trilha de destino
+        Arco arcoInicio2 = null;                // referente a trilha de origem
+        int numIntervalo = MIVB[0].length;      // quantidade de períodos
+        int numUsina = MIVB.length;             // quantidade de usinas
+        
         //arco inicial da trilha destino
         int usinadestino = superbasico.getDestino()[0];
         int intervalodestino = superbasico.getDestino()[1];
+    
         if((intervalodestino<numIntervalo)&&(usinadestino<numUsina)){
+            // caso o arco de destino seja um arco de defluência
             if(MIVB[usinadestino][intervalodestino]==1){
                 arcoInicio1 = new Arco(usinadestino, intervalodestino, usinasJusantes[usinadestino], intervalodestino);
                 usinadestino = usinasJusantes[usinadestino];
-            }else{
+            
+            // caso o arco de destino seja um arco de volume
+            } else{ 
                 arcoInicio1 = new Arco(usinadestino, intervalodestino, usinadestino, intervalodestino+1);
                 intervalodestino++;
             } 
         }
+        
         //arco inicial da trilha origem
         int usinaorigem = superbasico.getOrigem()[0];
         int intervaloOrigem = superbasico.getOrigem()[1];
+        
         if((intervaloOrigem<numIntervalo)&&(usinaorigem<numUsina)){
+            // caso o arco de origem seja um arco de defluência
             if(MIVB[usinaorigem][intervaloOrigem]==1){
                 arcoInicio2 = new Arco(usinaorigem, intervaloOrigem, usinasJusantes[usinaorigem], intervaloOrigem);
                 usinaorigem = usinasJusantes[usinaorigem];
-            }else{
+                
+            //caso o arco de origem seja um arco de volume    
+            } else{
                 arcoInicio2 = new Arco(usinaorigem, intervaloOrigem, usinaorigem, intervaloOrigem+1);
                 intervaloOrigem++;
             } 
         }
-        boolean teste2 = true;
-        boolean isrepetido=false;
-        boolean teste3 = true;
-        boolean sumidouroTrilhaDestino = false;
-        boolean sumidouroTrilhaOrigem = false;
+        
+        boolean teste2 = true;      // teste para o while da trilha de destino
+        boolean isrepetido = false; //caso o nó seja repetido 
+        boolean teste3 = true;      // teste para o while da trilha de origem
+        boolean sumidouroTrilhaDestino = false;  // teste para verificar se o nó sumidouro foi encontrado na trilha de destino
+        boolean sumidouroTrilhaOrigem = false;   // teste para verificar se o nó sumidouro foi encontrado na trilha de origem
+        
         while(true){
             //trilha origem
             while((teste3)&&(intervaloOrigem<=numIntervalo)&&(usinaorigem<=numUsina)){
@@ -78,19 +90,17 @@ public class Ciclo {
                         arcoInicio2 = new Arco(usinaorigem,intervaloOrigem,usinaorigem,intervaloOrigem+1);
                         intervaloOrigem++;
                     }
-                }  
-                 else{
+                } else{
                     sumidouroTrilhaOrigem = true;
-                     if(usinaorigem>= numUsina){
+                    if(usinaorigem>= numUsina){
                         usinaorigem++;
                     }else{
                         intervaloOrigem++;
                     }
-                 }
-                     
+                }
             }
             
-             teste3=true;
+            teste3 = true;
             if(isrepetido){
                 break;
             }
@@ -124,8 +134,7 @@ public class Ciclo {
                
             }
           
-            
-             if(isrepetido||(sumidouroTrilhaDestino && sumidouroTrilhaOrigem)){
+            if(isrepetido||(sumidouroTrilhaDestino && sumidouroTrilhaOrigem)){
                 break;
             }
             teste2=true;
@@ -139,13 +148,14 @@ public class Ciclo {
         }
    }
    
-   public boolean isRepetido(ArrayList<Arco> basicos,Arco arco){
+   public boolean isRepetido(ArrayList<Arco> basicos, Arco arco){
         for (Arco basico : basicos) {
             if(basico.getOrigem()[0]==arco.getOrigem()[0]&&basico.getOrigem()[1]==arco.getOrigem()[1]
-                    &&basico.getDestino()[0]==arco.getDestino()[0]&&basico.getDestino()[1]==arco.getDestino()[1]){
+               &&basico.getDestino()[0]==arco.getDestino()[0]&&basico.getDestino()[1]==arco.getDestino()[1]){
                 return true;
             }
         }
+        
         return false;
     }
    
@@ -160,6 +170,7 @@ public class Ciclo {
                break;
            }
        } 
+       
        if(isrepetido){
            int j=trilha.size()-1;
            while(trilha.size()!=(indice+1)){
@@ -167,8 +178,10 @@ public class Ciclo {
                j--;
            }
        }
+       
        return isrepetido;
-   }
+    }
+   
     public ArrayList<Arco> getArestasbasicas() {
         return arestasbasicas;
     }

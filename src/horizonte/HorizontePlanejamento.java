@@ -53,5 +53,4 @@ public class HorizontePlanejamento {
 	private int mesInical;
 	private int discretizacao;
 	private int tipo;
-	
 }

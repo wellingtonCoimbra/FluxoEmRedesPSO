@@ -3,25 +3,32 @@ package simulacao;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-
 import horizonte.HorizontePlanejamento;
 import horizonte.IntervaloDeHorizonte;
 import print.GravarPSO;
 import rede.NoHidroenergetico;
-import usina.Usina;
 import usina.UsinaHidroeletrica;
-import sistema.SistemaHidroeletrico;
 import sistema.SistemaHidrotermicoPSO;
 
 public class SimulacaoOperacaoEnergeticaPSO {
 	private SistemaHidrotermicoPSO SistemaHidroeletrico;
 	private HorizontePlanejamento HorizontePlanejamento;
-	private NoHidroenergetico[][]   nos;
+	private NoHidroenergetico[][] nos;
 	private double[] demanda;
 	private double[] valorAgua;
 	
-	public SimulacaoOperacaoEnergeticaPSO(int intervalos,double demanda){
+        
+        
+        
+        /**
+         *
+         * Construtor que inicializa as variáveis do objeto.
+         * 
+         * @param intervalos intervalos do horizonete de planejamento
+         * @param demanda demanda utilizada no caso teste
+         * 
+         */
+	public SimulacaoOperacaoEnergeticaPSO(int intervalos, double demanda){
 		SistemaHidroeletrico=new SistemaHidrotermicoPSO();
 		HorizontePlanejamento= new HorizontePlanejamento();
 		this.demanda=new double[intervalos];
@@ -29,24 +36,41 @@ public class SimulacaoOperacaoEnergeticaPSO {
 		for(int i=0;i<intervalos;i++){
 			this.demanda[i]=demanda;
 		}
-		
 	}
 	
+        
+        
+        
+        /**
+         *
+         * Método que define do Sistema Elétrico da Simulação, ou seja, define quais usinas participarão do caso teste.  
+         * 
+         * @param usinas usinas Hidroelétricas do caso teste
+         * 
+         */
 	public void definirSistemaHidroeletrico( UsinaHidroeletrica usinas[]){
-	
 		for(int i=0;i< usinas.length;i++){
-			SistemaHidroeletrico.getUsinas().add(usinas[i]);
-			
+			SistemaHidroeletrico.getUsinas().add(usinas[i]);		
 		}
-		
-		
 	}
 	
 	
 	
-	
+        
+	/**
+         *
+         * Método que define Horizonte de Planejamento, ou seja, define quantos meses serão utilziados na simulação.  
+         * 
+         * @param paramTaxaJurosNominal taxa de juros empregada
+         * @param paramPlanejamentoCustoGeracaoHidrotermica ??????
+         * @param paramMesInicial mês inicial do período de planejamento
+         * @param paramDiscretizacao qual a discretização do horizonte de planejamento
+         * @param paramTipo ??????
+         * @param intervalo intervalo do horizonte de planejamento
+         * 
+         */
 	public void definirHorizontePlanejamento(double paramTaxaJurosNominal,double paramPlanejamentoCustoGeracaoHidrotermica,
-			int paramMesInicial,int paramDiscretizacao,int paramTipo,IntervaloDeHorizonte intervalo[]){
+                int paramMesInicial,int paramDiscretizacao,int paramTipo,IntervaloDeHorizonte intervalo[]){
 		HorizontePlanejamento.setDiscretizacao(paramDiscretizacao);
 		HorizontePlanejamento.setMesInical(paramMesInicial);
 		HorizontePlanejamento.setTaxaJurosNominal(paramTaxaJurosNominal);
@@ -55,10 +79,21 @@ public class SimulacaoOperacaoEnergeticaPSO {
 		
 		for(int i=0;i<intervalo.length;i++){
 			HorizontePlanejamento.getIntervalos().add(intervalo[i]);
-		}
-		
+		}	
 	}
 	
+        
+        
+        
+        /**
+         *
+         * Método que define os volumes finais em cada período do horizonte de planejamento.  
+         * 
+         * @param volumes volumes das usinas
+         * @param numUsinas quantidade de usinas
+         * @param numIntervalos número de intervalos do horizonte de planejamento
+         * 
+         */
 	public void definirVolumesFinais(double[][] volumes,int numUsinas,int numIntervalos){
 		//HorizontePlanejamento.setNumeroIntervalos(5);
 		int aux;
@@ -69,69 +104,107 @@ public class SimulacaoOperacaoEnergeticaPSO {
 				//aux++;
 			}
 		}
-		
-		
 	}
         
-        public void definirVazoesDefluentes(double[][] vazoes, int numUsinas,int numIntervalos){
-            
-            int aux;
-            aux = numUsinas;
-            for(int i=0;i<numUsinas;i++){
+        
+        
+        
+        /**
+         *
+         * Método que define as vazões defluentes em cada período do horizonte de planejamento.  
+         * 
+         * @param vazoes vazões defluentes das usinas
+         * @param numUsinas quantidade de usinas
+         * @param numIntervalos número de intervalos do horizonte de planejamento
+         * 
+         */
+        public void definirVazoesDefluentes(double[][] vazoes, int numUsinas, int numIntervalos){
+                int aux;
+                aux = numUsinas;
+                for(int i=0;i<numUsinas;i++){
 			//aux=i*60;
 			for(int j=0;j<numIntervalos;j++){
-                            // é acrescentado o numIntervalos pq a posicao das vazoes estao depois dos volumes
+                                // é acrescentado o numIntervalos pq a posicao das vazoes estao depois dos volumes
 				nos[j][i].setVazaoDefluente(vazoes[i][j+numIntervalos]);
 				//aux++;
 			}
 		}
         }
-	
-	public void definirVazoesAfluentesNaturais(double Afluencias[][],int numUsinas,int numIntervalos){
+
+        
+        
+        
+        /**
+         *
+         * Método que define as vazões afluentes naturais das usinas em cada período do horizonte de planejamento.  
+         * 
+         * @param afluencias vazões afluentes naturais das usinas
+         * @param numUsinas quantidade de usinas
+         * @param numIntervalos número de intervalos do horizonte de planejamento
+         * 
+         */
+	public void definirVazoesAfluentesNaturais(double afluencias[][],int numUsinas,int numIntervalos){
 		//HorizontePlanejamento.setNumeroIntervalos(5);
 		nos=new NoHidroenergetico[numIntervalos][numUsinas];
 		for(int i=0;i<numIntervalos;i++){
-		
 			for(int j=0;j<numUsinas;j++){
 				NoHidroenergetico no=new NoHidroenergetico();
 				nos[i][j]=no;
-				nos[i][j].setVazaoAfluenteNatural(Afluencias[i][j]);
+				nos[i][j].setVazaoAfluenteNatural(afluencias[i][j]);
 			}
 		}
-		
-		
 	}
-	
 
-	public void definirRestricoesOperativas(double[] restricaoVolume,int j
-			,double[] limitesDefluencia,double limiteMaxGH){
+        
+        
+        
+        /**
+         *
+         * Método que define as restrições operativas da simulação do caso teste.  
+         * 
+         * @param restricaoVolume restrições dos volumes máximo e mínimo de cada usina
+         * @param j ?????????????????
+         * @param limitesDefluencia restrições das vazões defluentes máxima e mínima de cada usina
+         * @param limiteMaxGH limite máximo da geração hidráulica do sistema
+         * 
+         */
+	public void definirRestricoesOperativas(double[] restricaoVolume,int j,
+                                                double[] limitesDefluencia,double limiteMaxGH){
 		double tamMatriz=nos.length;
 		for(int i=0;i<tamMatriz;i++){
-			
 			nos[i][j].setLimiteMinimoVolume(restricaoVolume[0]);
 			nos[i][j].setLimiteMaximoVoume(restricaoVolume[1]);
 			nos[i][j].setLimiteMinimoVazaoDefluente(limitesDefluencia[0]);
 			nos[i][j].setLimiteMaximoVazaoDefluente(limitesDefluencia[1]);
 			nos[i][j].setLimiteMaximoGeracaoHidraulica(limiteMaxGH);
 		}
-		
-		
 	}
-	
+
+        
+        
+        
 	public void definirMercadoEnergia(){
 		
-		
 	}
-	
+
+        
+        
+        /**
+         *
+         * Método que define os volumes iniciais das usinas.  
+         * 
+         * @param volumesIniciais volumes iniciais das usinas
+         * 
+         */
 	public void definirVolumeInicial(double volumesIniciais[]){
-		
-			for(int i=0;i<SistemaHidroeletrico.getUsinas().size();i++){
-				nos[0][i].setVolumeInicial(volumesIniciais[i]);
-			}
-		
-		
+		for(int i=0;i<SistemaHidroeletrico.getUsinas().size();i++){
+			nos[0][i].setVolumeInicial(volumesIniciais[i]);
+		}
 	}
-	
+
+        
+        
+        
 	public void definirPoliticaOperativaEnergetica(){
 		
 		
@@ -163,39 +236,38 @@ public class SimulacaoOperacaoEnergeticaPSO {
 	
 	
 	//metodo de simula��o da gera��o com o PSO
-		public double simularOperacaoEnergeticaPSO(int numIntervalos){
-			//double EASM=SistemaHidroeletrico.EnergiaArmazenadaMaximaNoSistema(nos[0]);
-			double geracao=0;
-			double custo = 0;
-			
-			for(int i=0;i<numIntervalos;i++){
-				if(i==0){
-					
-					geracao=SistemaHidroeletrico.Executar(i, demanda[i], nos[i],nos[i],HorizontePlanejamento.getIntervalos().get(i));
-					HorizontePlanejamento.getIntervalos().get(i).setGeracaoHidraulica(geracao);
-					if(demanda[i]>geracao){
-						custo=custo + Math.pow(demanda[i]-geracao,2);
-					}
-//					if(geracao==0){
-//						custo=custo+demanda[i]/2;
-//					}
-					System.out.println("intervalo " +i+" geracao "+geracao);
+	public double simularOperacaoEnergeticaPSO(int numIntervalos){
+		//double EASM=SistemaHidroeletrico.EnergiaArmazenadaMaximaNoSistema(nos[0]);
+		double geracao=0;
+		double custo = 0;
+		
+		for(int i=0;i<numIntervalos;i++){
+			if(i==0){
+				geracao=SistemaHidroeletrico.Executar(i, demanda[i], nos[i], nos[i],HorizontePlanejamento.getIntervalos().get(i));
+				HorizontePlanejamento.getIntervalos().get(i).setGeracaoHidraulica(geracao);
+				if(demanda[i]>geracao){
+					custo=custo + Math.pow(demanda[i]-geracao,2);
 				}
-				else{
-					geracao=SistemaHidroeletrico.Executar(i, demanda[i], nos[i],nos[i-1],HorizontePlanejamento.getIntervalos().get(i));
-					HorizontePlanejamento.getIntervalos().get(i).setGeracaoHidraulica(geracao);
-					if(demanda[i] > geracao){
-						custo=custo + Math.pow(demanda[i]-geracao,2);
-					}
-//					if(geracao==0){
-//						custo=custo+demanda[i]/2;
-//					}
-					System.out.println("intervalo " +i+" geracao "+geracao);
+//				if(geracao==0){
+//					custo=custo+demanda[i]/2;
+//				}
+				System.out.println("intervalo " +i+" geracao "+geracao);
+			} else{
+				geracao=SistemaHidroeletrico.Executar(i, demanda[i], nos[i],nos[i-1],HorizontePlanejamento.getIntervalos().get(i));
+				HorizontePlanejamento.getIntervalos().get(i).setGeracaoHidraulica(geracao);
+				if(demanda[i] > geracao){
+					custo=custo + Math.pow(demanda[i]-geracao,2);
 				}
-				}
-			return custo/2;
-			
-		}
+//				if(geracao==0){
+//					custo=custo+demanda[i]/2;
+//				}
+				System.out.println("intervalo " +i+" geracao "+geracao);
+			}
+                }
+		return custo/2;
+        }
+                
+                
 	public double EnergiaArmazenada(){
 		double energia=SistemaHidroeletrico.EnergiaArmazenadaNoSistema(nos[59]);
 		GravarPSO print=new GravarPSO();
