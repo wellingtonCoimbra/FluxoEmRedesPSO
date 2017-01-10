@@ -29,6 +29,8 @@ public class FluxoEmRedes {
     public static void main(String[] args) {
         int numUsinas=3;
         int numIntervalos=4;
+        System.out.println(numUsinas);
+        System.out.println(numIntervalos);
         //emborcacao : 371;251;227;172
         //itumbiara : 1255;850;768; 582;
         //são simão : 1723 ; 1166 ;1054 ;799
@@ -41,7 +43,6 @@ public class FluxoEmRedes {
         double[] vazaoMax = new double[numUsinas];
         double demanda = 2500;
         FluxoEmRede fluxoEmRedes = new FluxoEmRede(numUsinas, numIntervalos, rede,volumeMin, volumeMax, vazaoMin,vazaoMax,demanda);
-        JOptionPane.showMessageDialog(null, "deu certo");
         for(int i = 0; i<1;i++){
             fluxoEmRedes.ParticaoEPATEC();
             System.out.println("i : "+(i+1));

@@ -315,9 +315,5 @@ public class SimulacaoOperacaoEnergeticaPSO {
 	public void setNos(NoHidroenergetico[][] nos) {
 		this.nos = nos;
 	}
-	
-	
-	
-
 }
 

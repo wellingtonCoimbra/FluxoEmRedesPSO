@@ -229,13 +229,13 @@ public class SistemaHidrotermicoPSO {
 //				VolumeMedio(nosIntervaloAtual);
 //				//double volumeMedio=Usinas.get(i).VolumeMedio(volumeFinal, volume);
 //				nosIntervaloAtual[i].setVazaoDefluente(vazaoDefluente);
-		}
+                        }
 			//nosIntervaloAtual[i].setVolumeMedio(volumeMedio);
 			//BalancoHidrico(nosIntervaloAtual);
-}
-	}
+                        }
+                }
 		return teste;
-	}
+        }
 	
 	public void VazaoAfluente(NoHidroenergetico[] nosHidroenergetico,double[] defluenciaUsinasAmontante){
 		double vazaoIncremental;
