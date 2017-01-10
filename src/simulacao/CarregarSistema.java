@@ -441,7 +441,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 		//------- afluencia de Emborcao------
 		try { 
-			FileReader arq = new FileReader("C:\\Users\\Anderson Aragao\\Documents\\Doc\\2017.1\\Fluxo em Rede e PSO\\afluências MLT\\Emborcação.txt");
+			FileReader arq = new FileReader("Vazoes Afluentes\\Emborcação.txt");
 			BufferedReader lerArq = new BufferedReader(arq); 
 			String linha = lerArq.readLine(); 
 			int i=0;
@@ -465,7 +465,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 		//------- afluencia de Itumbiara------
 				try { 
-					FileReader arq = new FileReader("C:\\Users\\Anderson Aragao\\Documents\\Doc\\2017.1\\Fluxo em Rede e PSO\\afluências MLT\\Itumbiara.txt");
+					FileReader arq = new FileReader("Vazoes Afluentes\\Itumbiara.txt");
 					BufferedReader lerArq = new BufferedReader(arq); 
 					String linha = lerArq.readLine(); 
 					int i=0;
@@ -489,7 +489,7 @@ public void testarSimulacaoUsinasReservatorio(SimulacaoOperacaoEnergeticaPSO sis
 		
 				//------- afluencia de S�o Sim�o------
 				try { 
-					FileReader arq = new FileReader("C:\\Users\\Anderson Aragao\\Documents\\Doc\\2017.1\\Fluxo em Rede e PSO\\afluências MLT\\São Simão.txt");
+					FileReader arq = new FileReader("Vazoes Afluentes\\São Simão.txt");
 					BufferedReader lerArq = new BufferedReader(arq); 
 					String linha = lerArq.readLine(); 
 					int i=0;
